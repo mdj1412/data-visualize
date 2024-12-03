@@ -45,6 +45,7 @@ def extract_verbs_and_objects(data, sentences, number_of_verbs=20, number_of_out
         tree = chunk_parser.parse(pos_tags)  # 구문 트리 생성
         
         once = False
+        data[idx]['verb_obj_pair'] = []
         for subtree in tree.subtrees(filter=lambda t: t.label() == 'VP'):  # VP (Verb Phrase)만 필터링
             if len(subtree) >= 2:  # 동사와 명사 확인
                 verb = subtree[0][0]  # 첫 번째 항목은 동사
@@ -53,23 +54,23 @@ def extract_verbs_and_objects(data, sentences, number_of_verbs=20, number_of_out
                 # TODO
                 if obj == "the" or obj == "an" or obj == "a" or obj == "others" \
                     or obj == "any" or obj == "anyone":
-
-                    data[idx]['verb'], data[idx]['direct_object'] = None, None
                     continue
+
+                # if not once:
+                #     once = not once
+                # else:
+                #     print ("check verb , object pairs")
+                #     from IPython import embed; embed()
 
                 if verb not in verb_object_map:
                     verb_object_map[verb] = []
                 verb_object_map[verb].append(obj)  # 목적어 추가
                 
-                if ~once:
-                    once = True
-                else:
-                    print ("check verb , object pairs")
-                    from IPython import embed; embed()
-                data[idx]['verb'], data[idx]['direct_object'] = verb, obj
+                data[idx]['verb_obj_pair'].append( {"verb": verb, "direct_object": obj} )
+                # from IPython import embed; embed()
 
-            else:
-                data[idx]['verb'], data[idx]['direct_object'] = None, None
+        # if not once:
+        #     data[idx]['verb'], data[idx]['direct_object'] = None, None
 
     
     # Step 2: 동사별 빈도수 계산
